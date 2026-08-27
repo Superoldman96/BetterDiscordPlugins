@@ -1,6 +1,6 @@
 /**
  * @name MessageLoggerV2
- * @version 1.10.3
+ * @version 1.10.4
  * @invite NYvWdN5
  * @donate https://paypal.me/lighty13
  * @website https://1lighty.github.io/BetterDiscordStuff/?plugin=MessageLoggerV2
@@ -48,7 +48,7 @@ module.exports = class MessageLoggerV2 {
     return 'MessageLoggerV2';
   }
   getVersion() {
-    return '1.10.3';
+    return '1.10.4';
   }
   getAuthor() {
     return 'Lighty';
@@ -95,14 +95,7 @@ module.exports = class MessageLoggerV2 {
         title: 'Fixed',
         type: 'fixed',
         items: [
-          'Should no longer throw error about patching message components.. as much?',
-        ]
-      },
-      {
-        title: 'WIP',
-        type: 'progress',
-        items: [
-          'Images now open in the menu PARTIALLY, will implement something to either load images within Discord, or just open the image with system default image viewer instead.'
+          'Fixed a critical issue that caused channels to not load',
         ]
       },
       {
@@ -467,7 +460,8 @@ module.exports = class MessageLoggerV2 {
     // will revisit later if this becomes an issue, had a workaround for BDFDB
     this.Patcher = {
       before: (mod, func, cb) => BdApi.Patcher.before(this.getName(), mod, func, cb),
-      instead: (mod, func, cb) => BdApi.Patcher.instead(this.getName(), mod, func, cb),
+      // the instead patcher used to bind `this` context before handing over the orig function
+      instead: (mod, func, cb) => BdApi.Patcher.instead(this.getName(), mod, func, (thisObj, args, orig) => cb(thisObj, args, (...aargs) => orig.call(thisObj, ...aargs))),
       after: (mod, func, cb) => BdApi.Patcher.after(this.getName(), mod, func, cb),
       unpatchAll: () => BdApi.Patcher.unbindAll(this.getName())
     };
